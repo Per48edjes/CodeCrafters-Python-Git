@@ -1,6 +1,7 @@
-import sys
 import os
+import sys
 import zlib
+from hashlib import sha1
 
 
 def main():
@@ -18,7 +19,7 @@ def main():
         print("Initialized git directory")
 
     elif command == "cat-file":
-        # need to check valid flag 
+        # need to check valid flag
         if sys.argv[2] == "-p":
             blob_sha = sys.argv[3]
             dir_sha, blob_sha = blob_sha[:2], blob_sha[2:]
@@ -29,8 +30,40 @@ def main():
         with open(filename, "rb") as b:
             data = b.read()
             decomp_data = zlib.decompress(data)
-            _, output = decomp_data.split(b'\x00')
+            _, output = decomp_data.split(b"\x00")
             sys.stdout.buffer.write(output)
+
+    elif command == "hash-object":
+        # need to check valid flag
+        if sys.argv[2] == "-w":
+            filename = sys.argv[3]
+
+            # TODO: Figure out whether binary or not (and treat accordingly)?
+
+            # Hashing file contents
+            with open(filename, "rb") as f:
+                # "blob" + space + number of bytes + nullbyte + contents
+                contents = f.read()
+                contents = b"".join(
+                    [
+                        b"blob",
+                        b" ",
+                        bytes(f"{len(contents)}", encoding="utf-8"),
+                        b"\x00",
+                        contents,
+                    ]
+                )
+                sha = sha1(contents).hexdigest().strip()
+
+            # Create directory and object
+            dir_sha, blob_sha = sha[:2], sha[2:]
+            # Q: Would we need to check whether directory exists or not first?
+            os.mkdir(dir_sha)
+            filename = os.path.join(f".git/objects/{dir_sha}", blob_sha)
+
+            # TODO: Compress(?) and write the file
+            with open(filename, "w") as f:
+                pass
 
     else:
         raise RuntimeError(f"Unknown command #{command}")
