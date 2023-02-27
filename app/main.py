@@ -58,12 +58,17 @@ def main():
             # Create directory and object
             dir_sha, blob_sha = sha[:2], sha[2:]
             # Q: Would we need to check whether directory exists or not first?
-            os.mkdir(dir_sha)
+            if not (os.path.exists(f".git/objects/{dir_sha}") and os.path.isdir(f".git/objects/{dir_sha}")):
+                os.mkdir(f".git/objects/{dir_sha}")
+            
             filename = os.path.join(f".git/objects/{dir_sha}", blob_sha)
 
+
             # TODO: Compress(?) and write the file
-            with open(filename, "w") as f:
-                pass
+            with open(filename, "wb") as f:
+                f.write(zlib.compress(contents))
+
+            print(sha)
 
     else:
         raise RuntimeError(f"Unknown command #{command}")
