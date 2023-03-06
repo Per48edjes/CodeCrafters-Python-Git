@@ -69,6 +69,7 @@ def main():
                 f.write(zlib.compress(contents))
 
             print(sha)
+
     elif command == "ls-tree":
         """
         format of tree object:
@@ -88,13 +89,20 @@ def main():
         with open(filename, "rb") as b:
             data = b.read()
             decomp_data = zlib.decompress(data)
-            _, output = decomp_data.split(b"\x00", 1)
+            _, treedata = decomp_data.split(b"\x00", 1)
 
-            print(b'output: ' + output)
-            # sys.stdout.buffer.write(output)
-        # we have the tree object now and need to parse the output to just get 
-        # the file and folder names. the filename is prefaced by a space and succeeded by a null byte
-        # can discard the sha
+            res = []
+            while treedata:
+                # we don't need the mode
+                _, treedata = treedata.split(b' ', 1)
+                entry, treedata = treedata.split(b'\x00', 1)
+                res.append(entry)
+                # the next 20 bytes are the hash
+                treedata = treedata[20:]
+
+            sys.stdout.buffer.write(b"\n".join(res)+b"\n")
+
+
     else:
         raise RuntimeError(f"Unknown command #{command}")
 
