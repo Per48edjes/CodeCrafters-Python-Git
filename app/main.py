@@ -103,6 +103,28 @@ def main():
             sys.stdout.buffer.write(b"\n".join(res)+b"\n")
 
 
+
+    elif command == "write-tree":
+        
+        # list out the contents of the repo root(?)
+
+
+        # 1. os.scandir() object containing metadata + strings of the directory's entries
+        # as objects, that have a "name" field -- extract these names
+
+        # write these contents into a tree object (in the format prescribed
+        # above)
+
+        # Open Hypothesis: do we need to recurse into each tree to contruct the
+        # tree object which then gets hashed / provides the hash enclosed in the
+        # parent tree object?
+        # 2. 
+
+        # test by using our ls-tree function
+
+
+
+
     else:
         raise RuntimeError(f"Unknown command #{command}")
 
